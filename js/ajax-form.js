@@ -1,8 +1,8 @@
 /**
  * form.js
- * 
+ *
  * Micro library for work with ajax forms
- * 
+ *
  * Example:
  *      ```html
  *      <form method="POST" action="/handler" class="form">
@@ -26,7 +26,7 @@
  *          }
  *      });
  *      ```js
- * 
+ *
  * GitHub - https://github.com/ElStrategico/form.js
  */
 
@@ -39,6 +39,7 @@ const DefaultSettings = () => {
         proccessData: false,
         contentType: false,
         submit: formData => {},
+        sent: response => {},
         success: response => {},
         error: response => {},
         async: false
@@ -46,7 +47,7 @@ const DefaultSettings = () => {
 };
 
 /**
- * @param {object} settings 
+ * @param {object} settings
  */
 const FormInit = (settings = {}) => {
     let defaultSettings = DefaultSettings();
@@ -58,7 +59,9 @@ const FormInit = (settings = {}) => {
     }
 
     let formElement = $(settings.selector);
-    let formData = {};
+    let formData = {
+        _token: $('meta[name="csrf-token"]').attr('content')
+    };
     let inputs = $('form').find('[name]');
 
     for (let i = 0; i < inputs.length; i++) {
@@ -81,9 +84,11 @@ const FormInit = (settings = {}) => {
             contentType: settings.contentType,
             data: formData,
             success: response => {
+                settings.sent(response);
                 settings.success(response)
             },
             error: response => {
+                settings.sent(response);
                 settings.error(response)
             },
             async: settings.async
